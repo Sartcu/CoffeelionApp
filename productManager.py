@@ -13,9 +13,6 @@ class ProductManager(QObject):
         self.products_dict = self.load_products(file_path)
 
     def load_products(self, file_path):
-        """
-        從 JSON 檔案中讀取產品資訊並建立字典
-        """
         with open(file_path, 'r') as file:
             data = json.load(file)
 

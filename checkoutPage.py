@@ -149,7 +149,7 @@ class CheckoutPage(QWidget):
     def keyPressEvent(self, event):
         self.setFocus()
         super().keyPressEvent(event)
-        print(f"Key pressed: {event.text()} (Key code: {event.key()})")
+        # print(f"Key pressed: {event.text()} (Key code: {event.key()})")
         key_text = event.text()
 
         if not self.app.scan_btn_state:

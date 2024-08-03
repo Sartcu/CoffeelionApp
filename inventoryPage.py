@@ -57,6 +57,11 @@ class InventoryPage(QWidget):
         super().__init__()
         self.app = app
         self.inventoryManager = inventoryManager
+        
+        self.input_text = ""
+        self.scan_btn_state = False
+        self.scan_mode = None
+        
         self.setup_ui()
         self.setup_link()
 
@@ -117,8 +122,8 @@ class InventoryPage(QWidget):
 
     def inventory_table_scan_clicked(self):
         DBG_logger.logger.debug("inventory_table_scan_clicked")
-        self.app.scan_btn_state = not self.app.scan_btn_state
-        self.app.scan_status_label.setText("Scan ON" if self.app.scan_btn_state else "Scan OFF")
+        self.scan_btn_state = not self.scan_btn_state
+        self.app.scan_status_label.setText("Scan ON" if self.scan_btn_state else "Scan OFF")
 
     def inventory_table_plus_clicked(self):
         DBG_logger.logger.debug("inventory_table_plus_clicked")
@@ -142,3 +147,43 @@ class InventoryPage(QWidget):
         self.inventory_table_minus_btn.clicked.connect(self.inventory_table_minus_clicked)
         self.inventory_table_write_btn.clicked.connect(self.inventory_table_write_clicked)
 
+    def scan_num(self):
+        if self.scan_mode == 0:
+            num = 1
+        elif self.scan_mode == 1:
+            num = -1
+        else:
+            num = 0
+        return num
+
+    def keyPressEvent(self, event):
+        self.setFocus()
+        super().keyPressEvent(event)
+        add_num = self.scan_num()
+
+        print(f"Key pressed: {event.text()} (Key code: {event.key()})")
+        key_text = event.text()
+
+        if not self.scan_btn_state:
+            DBG_logger.logger.info("非掃描添加模式")
+            return
+
+        if key_text.isdigit():
+            self.input_text += key_text
+ 
+        elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            if not self.input_text.isdigit():
+                self.input_text = ""  # 清空輸入以避免後續處理錯誤
+                DBG_logger.logger.info("滑鼠點擊 Tablewidget 顯示視窗")
+            
+            print(f"scan: {self.scan_btn_state}, scan mode: {self.scan_mode}, add_num: {add_num}")
+            DBG_logger.logger.debug(f" scan: {self.scan_btn_state}, scan mode: {self.scan_mode}, add_num: {add_num}")
+
+            self.inventoryManager.update_quantity(self.get_table_name(), self.input_text, add_num)
+            self.input_text = ""
+            
+            inventory_dict = self.inventoryManager._get_inventory_dict(self.get_table_name())
+            self.inventory_table.update_table(inventory_dict)
+        else:
+            DBG_logger.logger.info("輸入法有誤")
+            self.input_text = ""

@@ -161,7 +161,6 @@ def update_table(table_name):
 if __name__ == '__main__':
     inventory = InventoryManager()
 
-    # 讀取 JSON 檔案
     path = 'coffeelionProductList.json'
     with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
